@@ -17,6 +17,12 @@ import "@ionic/react/css/structure.css";
 import "@ionic/react/css/typography.css";
 
 /* Optional CSS utils that can be commented out */
+import AuthContextProvider from "@/auth/AuthContext";
+import ProtectedRoute from "@/auth/ProtectedRoute";
+import Login from "@/pages/Auth/Login";
+import Bills from "@/pages/Bills/Bills";
+import Visitors from "@/pages/Visitors/Visitors";
+import Wallet from "@/pages/Wallet/Wallet";
 import "@ionic/react/css/display.css";
 import "@ionic/react/css/flex-utils.css";
 import "@ionic/react/css/float-elements.css";
@@ -24,10 +30,7 @@ import "@ionic/react/css/padding.css";
 import "@ionic/react/css/text-alignment.css";
 import "@ionic/react/css/text-transformation.css";
 import { cash, home, menu, people, wallet } from "ionicons/icons";
-import Bills from "pages/Bills/Bills";
-import Visitors from "pages/Visitors/Visitors";
-import Wallet from "pages/Wallet/Wallet";
-import { Route } from "react-router-dom";
+import { Redirect, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard/Dashboard";
 
 setupIonicReact();
@@ -35,23 +38,31 @@ setupIonicReact();
 function App() {
   return (
     <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route path="/" render={() => <Tabs />} />
-        </IonRouterOutlet>
-      </IonReactRouter>
+      <AuthContextProvider>
+        <IonReactRouter>
+          <IonRouterOutlet>
+            <Route path="/login" component={Login} exact />
+            <Route render={() => <AuthenticatedApp />} />
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </AuthContextProvider>
     </IonApp>
   );
 }
 
-function Tabs() {
+function AuthenticatedApp() {
   return (
     <IonTabs>
       <IonRouterOutlet>
-        <Route path="/dashboard" exact component={Dashboard} />
-        <Route path="/bills" exact component={Bills} />
-        <Route path="/wallet" exact component={Wallet} />
-        <Route path="/visitors" exact component={Visitors} />
+        <ProtectedRoute>
+          <Route path="/" exact>
+            <Redirect to="/dashboard" />
+          </Route>
+          <Route path="/dashboard" exact component={Dashboard} />
+          <Route path="/bills" exact component={Bills} />
+          <Route path="/wallet" exact component={Wallet} />
+          <Route path="/visitors" exact component={Visitors} />
+        </ProtectedRoute>
       </IonRouterOutlet>
       <IonTabBar
         slot="bottom"

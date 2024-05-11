@@ -20,11 +20,9 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     // add absolute path configuration
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "components": ["components/*"],
-      "pages": ["pages/*"],
-      "assets": ["assets/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],
