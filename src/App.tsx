@@ -66,7 +66,7 @@ function AuthenticatedApp() {
       </IonRouterOutlet>
       <IonTabBar
         slot="bottom"
-        className="shadow-[0px_0px_3px_0px_rgba(0,0,0,0.26)] py-1"
+        className="shadow-[0px_0px_3px_0px_rgba(0,0,0,0.26)] py-1 sticky bottom-0"
       >
         <IonTabButton tab="dashboard" href="/dashboard" mode="ios">
           <IonIcon icon={home} />
