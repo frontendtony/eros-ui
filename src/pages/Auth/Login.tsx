@@ -1,6 +1,6 @@
+import useAuth from "@/auth/useAuth";
 import LoginValidationSchema from "@/schemas/form/LoginFormSchema";
 import { login } from "@/services/authService";
-import { Preferences } from "@capacitor/preferences";
 import {
   IonButton,
   IonContent,
@@ -17,6 +17,7 @@ import { useHistory, useLocation } from "react-router";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 
 export default function Login() {
+  const { authenticate } = useAuth();
   const history = useHistory();
   const { search } = useLocation();
 
@@ -39,14 +40,17 @@ export default function Login() {
 
             await login(values.email, values.password)
               .then(async (response) => {
-                await Preferences.set({
-                  key: "user",
-                  value: JSON.stringify(response.data),
-                });
+                // Save the user and token to the context/storage
+                authenticate(response.data.token, response.data.user)
+                  .then(() => {
+                    // Redirect to the dashboard or the redirect URL if they were redirected to the login page
+                    const redirectUrl = searchParams.get("redirectUrl");
 
-                const redirectUrl = searchParams.get("redirectUrl");
-
-                history.push(redirectUrl || "/dashboard");
+                    history.push(redirectUrl || "/dashboard");
+                  })
+                  .catch((error) => {
+                    setError(error.message);
+                  });
               })
               .catch((error) => {
                 setError(error.message);
