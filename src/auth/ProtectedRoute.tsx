@@ -6,8 +6,6 @@ export default function ProtectedRoute({
 }: {
   children: React.ReactNode;
 }) {
-  console.log("ProtectedRoute");
-
   const { user } = useAuth();
 
   const isAuthenticated = user !== null;
