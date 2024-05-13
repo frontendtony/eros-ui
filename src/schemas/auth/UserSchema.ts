@@ -6,6 +6,7 @@ const UserSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   isAdmin: z.boolean(),
+  isEmailVerified: z.boolean(),
 });
 
 export default UserSchema;
