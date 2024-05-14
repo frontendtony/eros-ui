@@ -1,28 +1,43 @@
 import useAuth from "@/auth/useAuth";
+import EstateSchema from "@/schemas/estate/EstateSchema";
 import LoginValidationSchema from "@/schemas/form/LoginFormSchema";
 import { login } from "@/services/authService";
+import { getEstates } from "@/services/estateService";
 import {
   IonButton,
   IonContent,
   IonIcon,
   IonInput,
+  IonItem,
+  IonList,
+  IonModal,
   IonSpinner,
   IonToast,
 } from "@ionic/react";
 import { Formik } from "formik";
-import { logInOutline } from "ionicons/icons";
-import { useState } from "react";
+import { chevronForwardOutline, logInOutline } from "ionicons/icons";
+import { useRef, useState } from "react";
 import { useHistory, useLocation } from "react-router";
+import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 
 export default function Login() {
-  const { authenticate } = useAuth();
+  const { authenticate, setEstate } = useAuth();
   const history = useHistory();
   const { search } = useLocation();
 
   const searchParams = new URLSearchParams(search);
 
+  const modal = useRef<HTMLIonModalElement>(null);
+
   const [error, setError] = useState("");
+  const [estates, setEstates] = useState<z.infer<typeof EstateSchema>[]>([]);
+
+  const redirectToDashboard = () => {
+    const redirectUrl = searchParams.get("redirectUrl");
+
+    history.push(redirectUrl || "/dashboard");
+  };
 
   return (
     <IonContent className="p-6">
@@ -36,23 +51,31 @@ export default function Login() {
         onSubmit={async (values) => {
           setError("");
 
-          await login(values.email, values.password)
-            .then(async (response) => {
-              // Save the user and token to the context/storage
-              authenticate(response.data.token, response.data.user)
-                .then(() => {
-                  // Redirect to the dashboard or the redirect URL if they were redirected to the login page
-                  const redirectUrl = searchParams.get("redirectUrl");
+          try {
+            const loginResponse = await login(values.email, values.password);
+            const { token, user } = loginResponse.data;
 
-                  history.push(redirectUrl || "/dashboard");
-                })
-                .catch((error) => {
-                  setError(error.message);
-                });
-            })
-            .catch((error) => {
-              setError(error.message);
-            });
+            await authenticate(token, user);
+
+            const estatesResponse = await getEstates();
+
+            if (estatesResponse.length === 0) {
+              history.push("create-estate");
+            }
+
+            if (estatesResponse.length > 1) {
+              setEstates(estatesResponse);
+              return;
+            }
+
+            await setEstate(estatesResponse[0]);
+
+            redirectToDashboard();
+          } catch (error: unknown) {
+            setError(
+              error instanceof Error ? error.message : "An error occurred"
+            );
+          }
         }}
         validateOnBlur
       >
@@ -117,6 +140,35 @@ export default function Login() {
           </form>
         )}
       </Formik>
+
+      <IonModal
+        ref={modal}
+        trigger="open-modal"
+        initialBreakpoint={0.5}
+        breakpoints={[0.25, 0.5, 0.75]}
+        isOpen={estates.length > 1}
+        canDismiss={false}
+      >
+        <IonContent className="ion-padding">
+          <h1 className="text-2xl text-center mt-2 mb-6">Select an estate</h1>
+          <IonList lines="full">
+            {estates.map((estate) => (
+              <IonItem
+                key={estate.id}
+                onClick={async () => {
+                  await setEstate(estate);
+
+                  redirectToDashboard();
+                }}
+                className="cursor-pointer"
+              >
+                {estate.name}
+                <IonIcon icon={chevronForwardOutline} slot="end" />
+              </IonItem>
+            ))}
+          </IonList>
+        </IonContent>
+      </IonModal>
     </IonContent>
   );
 }

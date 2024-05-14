@@ -1,4 +1,4 @@
-import { SingleApiResponseSchema } from "@/schemas/ApiResponseSchemas";
+import { SingleApiResponseSchema } from "@/schemas/api/ApiResponseSchemas";
 import UserSchema from "@/schemas/auth/UserSchema";
 import { z } from "zod";
 
