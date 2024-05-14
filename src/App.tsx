@@ -127,12 +127,13 @@ function MenuContent() {
             <IonIcon icon={closeOutline} slot="start" />
           </IonButton>
         </IonMenuToggle>
-        <IonButton fill="clear" color="danger" onClick={logout}>
-          Logout
-          <IonIcon icon={logOutOutline} slot="end" />
-        </IonButton>
+        <IonMenuToggle>
+          <IonButton fill="clear" color="danger" onClick={logout}>
+            Logout
+            <IonIcon icon={logOutOutline} slot="end" />
+          </IonButton>
+        </IonMenuToggle>
       </div>
-      {/* <IonContent className="ion-padding">This is the menu content.</IonContent> */}
     </IonMenu>
   );
 }
